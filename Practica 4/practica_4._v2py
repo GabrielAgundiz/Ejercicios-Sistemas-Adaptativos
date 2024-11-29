@@ -1,0 +1,101 @@
+import random
+import time
+
+class Agente:
+    def __init__(self, nombre):
+        self.nombre = nombre
+        self.habilidad = random.randint(1, 10)
+        self.tareas_actuales = set()
+        self.tareas_realizadas = set()
+        self.equipo = None
+
+    def realizar_tarea(self, tarea):
+        # Simula la realización de una tarea por el agente
+        print(f"{self.nombre} del equipo {self.equipo} está realizando la tarea {tarea} con habilidad {self.habilidad}")
+        self.tareas_actuales.add(tarea)
+        self.tareas_realizadas.add(tarea)
+
+    def compartir_informacion(self, otros_agentes):
+        # Comparte información sobre su estado, habilidades, tareas actuales y tareas pasadas con otros agentes
+        for otro_agente in otros_agentes:
+            if otro_agente != self:
+                print(f"{self.nombre} comparte información con {otro_agente.nombre}")
+                otro_agente.recibir_informacion(self.nombre, self.habilidad, self.tareas_actuales, self.tareas_realizadas)
+
+    def recibir_informacion(self, nombre, habilidad, tareas_actuales, tareas_realizadas):
+        # Recibe información compartida por otros agentes
+        print(f"{self.nombre} recibe información de {nombre}: Habilidad={habilidad}, Tareas actuales={list(tareas_actuales)}, Tareas realizadas={list(tareas_realizadas)}")
+
+class Ambiente:
+    def __init__(self, agentes):
+        self.agentes = agentes
+        self.tareas = ["Tarea1", "Tarea2", "Tarea3"]
+        self.dificultad_tareas = {tarea: random.randint(1, 5) for tarea in self.tareas}
+        self.contador_tareas = 3  # Inicializado con el número de tareas existentes
+
+    def asignar_tarea(self, tarea):
+        # Asigna la tarea al equipo más hábil disponible
+        equipos = set(agente.equipo for agente in self.agentes)
+        for equipo in equipos:
+            agentes_en_equipo = [agente for agente in self.agentes if agente.equipo == equipo]
+            agente_elegido = max(agentes_en_equipo, key=lambda agente: agente.habilidad)
+            agente_elegido.realizar_tarea(tarea)
+    
+    def actualizar_entorno(self):
+        # Simula cambios en el entorno con el tiempo
+        for tarea in self.tareas:
+            # Cambia la dificultad de las tareas con el tiempo
+            self.dificultad_tareas[tarea] += random.randint(-1, 1)
+
+            # Introduce nuevas tareas ocasionalmente
+            if random.random() < 0.2:
+                nueva_tarea = f"NuevaTarea{self.contador_tareas + 1}"
+                self.contador_tareas += 1
+                self.tareas.append(nueva_tarea)
+                self.dificultad_tareas[nueva_tarea] = random.randint(1, 5)
+
+    def formar_equipos(self):
+        # Forma equipos dinámicamente según las habilidades de los agentes
+        equipos = []
+        for idx, agente in enumerate(sorted(self.agentes, key=lambda x: x.habilidad, reverse=True), start=1):
+            equipo = f"Equipo{idx}"
+            equipos.append(equipo)
+            agente.equipo = equipo
+
+        print("\nFormación de equipos:")
+        for agente in self.agentes:
+            print(f"{agente.nombre} pertenece al equipo {agente.equipo}")
+
+    def comunicacion_entre_agentes(self):
+        # Facilita la comunicación entre los agentes
+        for agente in self.agentes:
+            agente.compartir_informacion([otro_agente for otro_agente in self.agentes if otro_agente != agente])
+
+# Crear agentes
+agente1 = Agente("Agente1")
+agente2 = Agente("Agente2")
+agente3 = Agente("Agente3")
+agente4 = Agente("Agente4")
+agente5 = Agente("Agente5")
+
+# Crear ambiente con los agentes
+ambiente = Ambiente([agente1, agente2, agente3, agente4, agente5])
+
+# Simular interacciones en el tiempo
+for _ in range(5):  # Simula 5 iteraciones temporales
+    print("\nIteración temporal:", _ + 1)
+
+    # Actualizar el entorno y formar equipos
+    ambiente.actualizar_entorno()
+    ambiente.formar_equipos()
+
+    # Comunicación entre agentes
+    ambiente.comunicacion_entre_agentes()
+
+    # Asignar tareas al ambiente
+    print("\nAsignación de tareas:")
+    for tarea in ambiente.tareas:
+        ambiente.asignar_tarea(tarea)
+
+    # Simular el paso del tiempo
+    time.sleep(1)

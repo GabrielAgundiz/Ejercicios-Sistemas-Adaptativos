@@ -1,0 +1,42 @@
+import random
+
+class Agente:
+    def __init__(self, nombre, presupuesto):
+        self.nombre = nombre
+        self.presupuesto = presupuesto
+        self.oferta_actual = 0
+
+    def hacer_oferta(self):
+        # Estrategia simple: oferta aleatoria dentro del presupuesto disponible
+        self.oferta_actual = random.randint(0, self.presupuesto)
+        return self.oferta_actual
+
+class SubastaAscendente:
+    def __init__(self, agentes):
+        self.agentes = agentes
+        self.oferta_actual = 0
+        self.ganador = None
+
+    def realizar_subasta(self):
+        print("Comienza la subasta ascendente.")
+        while True:
+            for agente in self.agentes:
+                oferta = agente.hacer_oferta()
+                print(f"{agente.nombre} ofrece {oferta}.")
+                if oferta > self.oferta_actual:
+                    self.oferta_actual = oferta
+                    self.ganador = agente
+                    print(f"¡Nueva oferta más alta! {agente.nombre} lidera con {oferta}.")
+            if input("¿Continuar la subasta? (s/n): ").lower() != 's':
+                break
+        print(f"La subasta ha finalizado. {self.ganador.nombre} gana con una oferta de {self.oferta_actual}.")
+
+# Crear agentes
+agente1 = Agente("Agente 1", 100)
+agente2 = Agente("Agente 2", 150)
+
+# Crear subasta con agentes
+subasta = SubastaAscendente([agente1, agente2])
+
+# Realizar la subasta
+subasta.realizar_subasta()
